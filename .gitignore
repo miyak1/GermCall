@@ -1,0 +1,32 @@
+# outputs, data and large files: never commit
+germcall_test/
+*.fastq
+*.fastq.gz
+*.fq.gz
+*.bam
+*.bai
+*.cram
+*.g.vcf.gz
+*.vcf
+*.vcf.gz
+*.tbi
+*.csi
+00_*/
+01_*/
+02_*/
+03_*/
+04_*/
+05_*/
+qc_reports/
+summary/
+logs/
+status/
+tmp/
+# your own configs and sample tables (local paths); the examples are tracked
+config/*.yaml
+config/*.tsv
+!config/config.example.yaml
+!config/samples.example.tsv
+.DS_Store
+__pycache__/
+*.pyc

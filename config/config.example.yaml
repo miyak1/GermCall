@@ -1,0 +1,67 @@
+# =============================================================================
+#  GermCall: FASTQ -> read QC (FastQC) -> Trim Galore -> BWA-MEM -> MarkDuplicates ->
+#  GATK HaplotypeCaller gVCFs -> joint genotyping -> hard-filtered SNPs and indels -> summary + MultiQC report
+#
+#      cp config/config.example.yaml config/my_config.yaml
+# =============================================================================
+project:
+  name: "my_germplasm_calling"       # free text, shown in the summary report
+  prefix: "mycrop"                   # prefix of the final VCF files (letters, digits, _ -)
+  workdir: "/path/to/calling_output" # all outputs go here
+  threads: 16                        # total CPU threads you allow
+
+calling:
+  reference: "/path/to/reference.fa"       # the SAME reference for every step; indices are created next to it
+  samples_file: "/path/to/samples.tsv"     # table: sample <TAB> R1.fastq.gz <TAB> R2.fastq.gz
+  paired: true                             # false = single-end (R2 column is ignored)
+
+  # ---- parallelism and memory ----
+  parallel_samples: 4                # samples processed at the same time (stages 'trim_align' and 'gvcf')
+  threads_per_sample: 4              # threads each sample job uses (parallel_samples x threads_per_sample <= threads)
+  parallel_intervals: 4              # chromosomes genotyped at the same time (stage 'joint')
+  java_mem_gb: 8                     # memory for ONE GATK job (parallel jobs x this must fit in RAM)
+
+  # ---- Trim Galore ----
+  trim_quality: 20                   # --quality
+  trim_min_length: 50                # --length
+  trim_extra: ""                     # extra Trim Galore options, e.g. "--clip_R1 5"
+  fastqc_after_trim: true            # also run FastQC on the trimmed reads (to compare with the raw reads)
+
+  # ---- joint calling ----
+  combine_method: "genomicsdb"       # "genomicsdb" (GenomicsDBImport, recommended) or "combinegvcfs"
+  chromosomes: []                    # contig names to genotype as separate jobs; [] = use n_chromosomes
+  n_chromosomes: 10                  # REQUIRED unless 'chromosomes' is set: the number of chromosomes of your species
+                                     # (the N longest contigs are treated as chromosomes; the rest are 'unplaced')
+  include_unplaced: true             # also genotype the remaining (small) contigs, one job each.
+                                     # For a fragmented assembly with thousands of scaffolds set false (or list the
+                                     # contigs you want in 'chromosomes') to avoid thousands of jobs
+  ploidy: 2                          # 2 = diploid. Set 4, 6 ... for polyploids (passed to HaplotypeCaller / GenotypeGVCFs)
+  # ---- hard filters for SNPs (stage "filter"; GATK generic recommendations; also listed by stage "summary") ----
+  filter_QD: 2.0                     # QD < value is removed
+  filter_QUAL: 30.0
+  filter_SOR: 3.0                    # SOR > value is removed
+  filter_FS: 60.0
+  filter_MQ: 40.0
+  filter_MQRankSum: -12.5
+  filter_ReadPosRankSum: -8.0
+  # ---- hard filters for INDELS (GATK recommendations; indels use laxer FS / ReadPosRankSum) ----
+  filter_indel_QD: 2.0
+  filter_indel_QUAL: 30.0
+  filter_indel_FS: 200.0
+  filter_indel_ReadPosRankSum: -20.0
+
+  # ---- disk space ----
+  keep_trimmed_fastq: false          # delete trimmed FASTQ after alignment
+  keep_unmarked_bam: false           # delete the sorted BAM after duplicates are marked
+  keep_genomicsdb: false             # delete GenomicsDB workspaces after genotyping
+
+tools:
+  trim_galore: "trim_galore"
+  fastqc: "fastqc"
+  multiqc: "multiqc"
+  bwa: "bwa"
+  samtools: "samtools"
+  gatk: "gatk"
+  bcftools: "bcftools"
+  bgzip: "bgzip"
+  tabix: "tabix"
