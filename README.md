@@ -33,7 +33,7 @@ flowchart LR
 
 ## Install
 ```bash
-git clone https://github.com/YOUR-USERNAME/GermCall.git && cd GermCall
+git clone https://github.com/miyak1/GermCall.git && cd GermCall
 conda config --set channel_priority strict
 conda env create -f environment.yml          # FastQC, MultiQC, Trim Galore, BWA, samtools, bcftools, GATK4, Java 17
 conda activate germcall
