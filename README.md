@@ -33,7 +33,7 @@ flowchart LR
 
 ## Install
 ```bash
-git clone https://github.com/miyak1/GermCall.git && cd GermCall
+git clone https://github.com/YOUR-USERNAME/GermCall.git && cd GermCall
 conda config --set channel_priority strict
 conda env create -f environment.yml          # FastQC, MultiQC, Trim Galore, BWA, samtools, bcftools, GATK4, Java 17
 conda activate germcall
@@ -133,3 +133,7 @@ The joint VCF carries `FORMAT/DP` and `GQ`, so GermGWAS' default QC filters (`qc
 | GenomicsDBImport fails for a contig | read `logs/joint_<contig>.log`; as a fallback set `calling.combine_method: combinegvcfs` |
 | Mapping rate very low for one sample | wrong reference, contamination or a sample mix-up: check its FastQC and the first reads with BLAST before continuing |
 | Joint VCF has fewer samples than the table | a gVCF stage failed or a sample name is duplicated; check `logs/` and `status/` |
+
+## License and citation
+GermCall is released under the [MIT License](LICENSE) (c) 2026 Sowmiya Kathir.
+It runs other programs that have their own licenses and that you install separately: GATK, BWA, samtools / bcftools / htslib, FastQC, Trim Galore, Cutadapt and MultiQC. If you publish results made with GermCall, please cite those programs; see their web pages for the preferred citation.
